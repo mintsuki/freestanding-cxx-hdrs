@@ -1,0 +1,27 @@
+#ifndef _CXXSHIM_NEW
+#define _CXXSHIM_NEW
+
+#include <stddef.h>
+
+#ifdef CXXSHIM_INTEGRATE_GCC
+
+#include_next <new>
+
+#else // CXXSHIM_INTEGRATE_GCC
+
+inline void *operator new (size_t, void *p) {
+	return p;
+}
+
+namespace std {
+
+template<typename T>
+[[nodiscard]] constexpr T *launder(T *p) noexcept {
+	return __builtin_launder(p);
+}
+
+} // namespace std
+
+#endif // !(CXXSHIM_INTEGRATE_GCC)
+
+#endif // _CXXSHIM_NEW

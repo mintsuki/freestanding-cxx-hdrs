@@ -1,0 +1,101 @@
+#ifndef _CXXSHIM_UTILITY
+#define _CXXSHIM_UTILITY
+
+#include <stddef.h>
+#include <type_traits>
+
+#ifdef CXXSHIM_INTEGRATE_GCC
+#include <bits/move.h>
+#endif
+
+namespace std {
+
+#ifndef CXXSHIM_INTEGRATE_GCC
+template<typename T>
+constexpr remove_reference_t<T> &&move(T &&x) noexcept {
+	return static_cast<remove_reference_t<T> &&>(x);
+}
+
+template<typename T>
+constexpr T &&forward(remove_reference_t<T> &x) noexcept {
+	return static_cast<T &&>(x);
+}
+
+template<typename T>
+void swap(T &x, T &y) {
+	T temp{move(x)};
+	x = move(y);
+	y = move(temp);
+}
+#endif // !defined(CXXSHIM_INTEGRATE_GCC)
+
+template<class T, class U = T>
+T exchange(T &ref, U &&v) {
+	T temp = std::move(ref);
+	ref = std::forward<U>(v);
+	return temp;
+}
+
+template<typename I, I... Seq>
+class integer_sequence { };
+
+template<size_t... Seq>
+using index_sequence = integer_sequence<size_t, Seq...>;
+
+namespace detail {
+	template<typename I, I X, I N, I... Seq>
+	struct _make_seq_helper {
+		using type = typename _make_seq_helper<I, X + 1, N, Seq..., X>::type;
+	};
+
+	template<typename I, I N, I... Seq>
+	struct _make_seq_helper<I, N, N, Seq...> {
+		using type = integer_sequence<I, Seq...>;
+	};
+} // namespace detail
+
+template<typename I, I N>
+using make_integer_sequence = typename detail::_make_seq_helper<I, 0, N>::type;
+
+template<size_t N>
+using make_index_sequence = make_integer_sequence<size_t, N>;
+
+template<typename... T>
+using index_sequence_for = make_index_sequence<sizeof...(T)>;
+
+struct source_location {
+	static consteval source_location current(
+			const char *file = __builtin_FILE(),
+			const char *function = __builtin_FUNCTION(),
+			unsigned int line = __builtin_LINE(),
+// GCC 10 has all builtins except for __builtin_COLUMN.
+#if __has_builtin(__builtin_COLUMN)
+			unsigned int column = __builtin_COLUMN()) {
+#else
+			unsigned int column = 0) {
+#endif
+		source_location sl;
+		sl.file_ = file;
+		sl.function_ = function;
+		sl.line_ = line;
+		sl.column_ = column;
+		return sl;
+	}
+
+	source_location() = default;
+
+	auto file() { return file_; }
+	auto function() { return function_; }
+	auto line() { return line_; }
+	auto column() { return column_; }
+
+private:
+	const char *file_ = nullptr;
+	const char *function_ = nullptr;
+	unsigned int line_ = 0;
+	unsigned int column_ = 0;
+};
+
+} // namespace std
+
+#endif // _CXXSHIM_UTILITY
