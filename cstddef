@@ -7,11 +7,9 @@
 
 namespace std {
 
-enum class byte : unsigned char {};
-
-#define __LIBC_GUARDLESS_INCLUDE
+#define __LIBC_CXX_WRAP
 #include <stddef.h>
-#undef __LIBC_GUARDLESS_INCLUDE
+#undef __LIBC_CXX_WRAP
 
 }
 
