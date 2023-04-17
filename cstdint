@@ -2,14 +2,14 @@
 #error "Must only use this header with C++"
 #endif
 
-#ifndef _CSTDINT
-#define _CSTDINT 1
+#ifndef __FSTD_HDRS_CSTDINT
+#define __FSTD_HDRS_CSTDINT 1
 
 namespace std {
 
-#define __LIBC_CXX_WRAP
+#define __FSTD_HDRS_CXX_WRAP
 #include <stdint.h>
-#undef __LIBC_CXX_WRAP
+#undef __FSTD_HDRS_CXX_WRAP
 
 }
 
