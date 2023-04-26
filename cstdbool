@@ -1,7 +1,3 @@
-#ifndef __cplusplus
-#error "Must only use this header with C++"
-#endif
-
 #ifndef __FSTD_HDRS_CSTDBOOL
 #define __FSTD_HDRS_CSTDBOOL 1
 
